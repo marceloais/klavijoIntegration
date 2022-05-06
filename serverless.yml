@@ -5,7 +5,7 @@ service: klavijointegration
 frameworkVersion: '3'
 
 custom:
-  tableName: 'klavijo-event-table-${self:provider.stage}'
+  klavijo_campaigns: 'klavijo-campaigns-table-${self:provider.stage}'
   klavijo_api: 'pk_62eddd6e696c0f55657837f33ec7ee3c8c'
   wsgi:
     app: app.app
@@ -26,10 +26,10 @@ provider:
             - dynamodb:UpdateItem
             - dynamodb:DeleteItem
           Resource:
-            - Fn::GetAtt: [ UsersTable, Arn ]
+            - Fn::GetAtt: [ KlavijoCampaigns, Arn ]
   environment:
-    USERS_TABLE: ${self:custom.tableName}
-    KLAVIJO: ${self:custom.klavijo_api}
+    KLAVIJO_CAMPAIGNS: ${self:custom.klavijo_campaigns}
+
 functions:
   api:
     handler: wsgi_handler.handler
@@ -42,20 +42,7 @@ plugins:
 
 resources:
   Resources:
-    UsersTable:
-      Type: AWS::DynamoDB::Table
-      Properties:
-        AttributeDefinitions:
-          - AttributeName: userId
-            AttributeType: S
-        KeySchema:
-          - AttributeName: userId
-            KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
-        TableName: ${self:custom.tableName}
-    KlavijoCampaign:
+    KlavijoCampaigns:
       Type: AWS::DynamoDB::Table
       Properties:
         AttributeDefinitions:
@@ -67,4 +54,4 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 20
           WriteCapacityUnits: 20
-        TableName: ${self:custom.klavijo_api}  
+        TableName: ${self:custom.klavijo_campaigns}

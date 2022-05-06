@@ -2,6 +2,24 @@ from sqlalchemy import false
 from pkg import Base, Column, Integer, String, Float, Boolean, ForeignKey, engine, relationship, Table, MetaData, Text, Date, Time, DateTime, func, text
 from datetime import datetime
 
+
+class Supplier(Base):
+    __tablename__ = 'supplier'
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String(255))
+    flow = Column(Text)
+    updated_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.now())
+    
+    advertible_supplier = relationship('Advertible', back_populates='supplier_advertible', lazy=True)
+
+    def __init__(self, **kwargs):
+        for property, value in kwargs.items():
+            setattr(self, property, value)
+
+    def __repr__(self):
+        return str(self.name)
 class Advertible(Base):
     __tablename__ = 'advertible'
 
@@ -14,9 +32,9 @@ class Advertible(Base):
     organization_id = Column(Integer, ForeignKey('organization.id'), nullable=False)
 
     supplier_id = Column(Integer, ForeignKey('supplier.id'), nullable=True)
-    supplier_advertisable = relationship("Supplier", back_populates="advertible_supplier")
+    supplier_advertible = relationship("Supplier", back_populates="advertible_supplier")
 
-    ads = relationship('Ads', back_populates='advertisable', lazy=True)
+    
     campaigns_advertible = relationship('Campaigns', back_populates='advertible_campaigns', lazy=True)
 
     created_at = Column(DateTime, default=datetime.now())
@@ -43,9 +61,6 @@ class Organization(Base):
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
     
     advertibles = relationship('Advertible', backref='organization', lazy=True)
-    setads = relationship('Setads', back_populates='organization2', lazy=True)
-    audiences = relationship('Audiences', back_populates='organization4', lazy=True)
-    storytellings = relationship('Storytellings', back_populates='organization5', lazy=True)
     
     def __init__(self, **kwargs):
         for property, value in kwargs.items():
