@@ -1,7 +1,7 @@
 import os, boto3, json, requests, datetime
 from flask import Flask, jsonify, make_response, request
 from pkg import session
-from pkg.models import Campaigns
+from pkg.models import Campaigns, Advertible
 from pkg.klavijo import Klavijo
 from boto3.dynamodb.types import TypeSerializer
 
@@ -14,6 +14,22 @@ if os.environ.get('IS_OFFLINE'):
     )
 
 KLAVIJO_CAMPAIGNS = os.environ['KLAVIJO_CAMPAIGNS']
+
+
+# Ir a buscar un advertible del tipo Klavijo y verificar si existe
+def get_advertible(advertiser_id):
+    advertiser = session.query(Advertible).filter(Advertible.supplier_id==11).all()
+    if advertiser:
+        for line in advertiser:
+            print(line.adroll_id, line.supplier_id, line.name)
+            q = session.query(Campaigns).filter(Campaigns.provider_id == line.adroll_id).first()
+            if not q:
+                new_campaign = Campaigns(provider_id=line.adroll_id, advertisable_id=line.id)
+                session.add(new_campaign)
+                session.commit()
+                print(new_campaign.__dict__)
+            else:
+                print({'success': 'Campaign found'})
 
 def get_campaigns(user_id):
     klavijo_campaigns = Klavijo()
@@ -31,17 +47,3 @@ def get_campaigns(user_id):
                 dynamodb_client.put_item(TableName=KLAVIJO_CAMPAIGNS, Item=low_level_copy)
             else:
                 print(f"Campaign {campaign.get('id')} already exists")
-
-
-    # result = dynamodb_client.get_item(
-    #     TableName=USERS_TABLE, Key={'userId': {'S': user_id}}
-    # )
-    # item = result.get('Item')
-    # if not item:
-    #     return jsonify({'error': 'Could not find user with provided "userId"'}), 404
-
-    # return jsonify(
-    #     {'userId': item.get('userId').get('S'), 'name': item.get('name').get('S')}
-    # )
-
-get_campaigns(1)

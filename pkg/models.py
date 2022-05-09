@@ -45,7 +45,7 @@ class Advertible(Base):
             setattr(self, property, value)
 
     def __repr__(self):
-        return str(self.name)
+        return f"{str(self.name)} {str(self.adroll_id)}"
 
 class Organization(Base):
     __tablename__ = 'organization'
@@ -61,6 +61,7 @@ class Organization(Base):
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())
     
     advertibles = relationship('Advertible', backref='organization', lazy=True)
+
     
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

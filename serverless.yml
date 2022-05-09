@@ -35,6 +35,14 @@ functions:
     handler: wsgi_handler.handler
     events:
       - httpApi: '*'
+  get_advertible:
+    handler: crons.get_advertible
+    events:
+      - httpApi: '*'
+  get_campaigns:
+    handler: crons.get_campaigns
+    events:
+      - httpApi: '*'
 
 plugins:
   - serverless-wsgi
