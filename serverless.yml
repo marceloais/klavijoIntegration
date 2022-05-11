@@ -37,12 +37,14 @@ functions:
       - httpApi: '*'
   get_advertible:
     handler: crons.get_advertible
+    memorySize: 128
     events:
-      - httpApi: '*'
+      - schedule: rate(24 hours)
   get_campaigns:
     handler: crons.get_campaigns
+    memorySize: 128
     events:
-      - httpApi: '*'
+      - schedule: rate(12 hours)
 
 plugins:
   - serverless-wsgi

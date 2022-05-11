@@ -1,3 +1,4 @@
+from venv import create
 import requests, json
 
 class Klavijo:
@@ -13,8 +14,8 @@ class Klavijo:
         url = f"https://a.klaviyo.com/api/v1/"
         if object:
             url += f"{object}?"
-        if page or page==0:
-            url += f"&page={page}"
+        if page or page>=0:
+            url += f"page={page}"
         if count:
             url += f"&count={count}"
         if sort:
@@ -34,7 +35,6 @@ class Klavijo:
         url = self.create_url(object="metrics/timeline", count=100)
         response = requests.get(url, headers=self.headers).text
         response = json.loads(response)
-        print(response)
     
     def get_events_by_metric(self, metric_id):
         url = self.create_url(object=f"metric/{metric_id}/timeline", count=100)
@@ -57,6 +57,44 @@ class Klavijo:
                 person_id = line.get('person').get('id')
                 print(self.get_profiles(person_id))
 
-a = Klavijo()
-a.get_metrics()
-print(a.metrics)
+    def get_objects(self, object=None, count=None, sort=None, type=None, object_id=None):
+        if type == 1:
+            url_object = f"{object}/{object_id}/timeline"
+        else:
+            url_object = f"{object}"
+
+        positive, data_list = True, list()
+        c = 0
+        while positive:
+            print("*****************************")
+            url = self.create_url(object=url_object, page=c, count=count)
+            print(url)
+            metrics = json.loads(requests.get(url, headers=self.headers).text)
+            print(metrics)
+            if type == 0:
+                page_size = metrics.get("page_size")
+                if page_size <= 0:
+                    positive = False
+                c+=1
+                data_list.append(metrics.get('data'))
+
+            elif type == 1:
+                print("----..-----")
+                next = metrics.get('next')
+                data = metrics.get('data')
+                for line in data:
+                    print(".-.-")
+                    print(line)
+                if not next:
+                    positive=False
+                c+=1
+        print("-------------------------------")
+        return data_list[:-1]        
+    
+a=Klavijo()
+b=a.get_objects(object="metrics", count=5, sort=None, type=0)
+for metrics in b:
+    for metric in metrics:
+        d = Klavijo()
+        e = d.get_objects(object="metric", count=100, sort=None, type=1, object_id=metric.get('id'))
+        print(e)

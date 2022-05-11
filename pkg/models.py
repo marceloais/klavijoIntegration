@@ -36,6 +36,7 @@ class Advertible(Base):
 
     
     campaigns_advertible = relationship('Campaigns', back_populates='advertible_campaigns', lazy=True)
+    events_advertible = relationship('Events', back_populates='advertible_events', lazy=True)
 
     created_at = Column(DateTime, default=datetime.now())
     updated_at = Column(DateTime, default=datetime.now(), onupdate=datetime.now())    
@@ -81,6 +82,24 @@ class Campaigns(Base):
 
     advertisable_id = Column(Integer, ForeignKey('advertible.id'))
     advertible_campaigns = relationship("Advertible", back_populates="campaigns_advertible")
+
+    def __init__(self, **kwargs):
+        for property, value in kwargs.items():
+            setattr(self, property, value)
+
+    def __repr__(self):
+        return str(self.id)
+
+class Events(Base):
+    __tablename__ = 'events'
+
+    id = Column(Integer, primary_key=True)
+    provider_id = Column(String(255), unique=True)
+    updated_at = Column(DateTime, default=datetime.now())
+    created_at = Column(DateTime, default=datetime.now())
+
+    advertisable_id = Column(Integer, ForeignKey('advertible.id'))
+    advertible_events = relationship("Advertible", back_populates="events_advertible")
 
     def __init__(self, **kwargs):
         for property, value in kwargs.items():

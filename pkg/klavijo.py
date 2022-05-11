@@ -39,9 +39,37 @@ class Klavijo:
             c+=1
             data_list.append(metrics.get('data'))
         return data_list[:-1]
-    
+
     def get_campaign_info(self, campaign_id):
         url = self.create_url(object=f"campaign/{campaign_id}")
         metrics = json.loads(requests.get(url, headers=self.headers).text)
         for key, value in metrics.items():
-            print(key, value)   
+            print(key, value)
+
+    def get_objects(self, object=None, object_id=None, element_name=None, count=None, sort=None, type=None):
+        if type == 1:
+            url_object = f"{object}/{object_id}/{element_name}"
+        else:
+            url_object = f"{object}"
+        positive, data_list = True, list()
+        c = 0
+        while positive:
+            url = self.create_url(object=url_object, page=c, count=count)
+            metrics = json.loads(requests.get(url, headers=self.headers).text)
+            if type == 0:
+                page_size = metrics.get("page_size")
+                if page_size <= 0:
+                    positive = False
+                c+=1
+                data_list.append(metrics.get('data'))
+            elif type == 1:
+                next = metrics.get('next')
+                data = metrics.get('data')
+                if not next:
+                    positive=False
+                c+=1
+                data_list.append(metrics.get('data'))
+        if type == 0:
+            return data_list[:-1]      
+        elif type == 1:
+            return data_list
